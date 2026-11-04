@@ -11,6 +11,10 @@ import { invalidateContentCache } from '../../domain/content/content.service.js'
 import type { ContentKey } from '../../domain/content/keys.js';
 import { replyCampaignNotFound } from './campaign-helpers.js';
 import { parseTelegramError } from '../../infra/telegram-errors.js';
+import { logger } from '../../infra/logger.js';
+import { env } from '../../config/env.js';
+import { listStrategyTypes, resolveStrategy } from '../../domain/rules/index.js';
+import type { CampaignStatus } from '../../generated/prisma/client.js';
 
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -224,4 +228,45 @@ adminCommands.command('export', async (ctx) => {
       ...(threadId ? { message_thread_id: threadId } : {}),
     });
   }
+});
+
+// Створює нову кампанію: /create_campaign <slug> <назва> <стратегія>
+adminCommands.command('create_campaign', async (ctx) => {
+  if (!(await isSuperAdmin(ctx.from.id))) return;
+
+  const slug = ctx.message.text.split(/\s+/)[1];
+  const title = ctx.message.text.split(/\s+/)[2];
+  const strategy = ctx.message.text.split(/\s+/)[3];
+
+  if (!slug || !title || !strategy) {
+    await ctx.reply('Використання: /create_campaign <slug> <назва> <стратегія>');
+    return;
+  }
+
+  const knownStrategies = listStrategyTypes();
+  if (!knownStrategies.includes(strategy)) {
+    await ctx.reply(
+      `❌ Невідома стратегія «${strategy}». Доступні: ${knownStrategies.join(', ')}`,
+    );
+    return;
+  }
+
+  const existing = await campaignRepo.findBySlug(slug);
+  if (existing) {
+    await ctx.reply(`❌ Кампанія зі slug «${slug}» вже існує.`);
+    return;
+  }
+
+  await campaignRepo.create({
+    slug,
+    title,
+    rules: { strategies: [{ type: strategy, config: {} }] } as never,
+    status: 'DRAFT' as CampaignStatus,
+    startsAt: null,
+    endsAt: null,
+    adminThreadId: null,
+    codePrefix: null
+  });
+
+  ctx.createForumTopic(title);
 });

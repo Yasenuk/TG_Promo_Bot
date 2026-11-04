@@ -31,4 +31,16 @@ export const campaignRepo = {
   setStatus(slug: string, status: Campaign['status']): Promise<Campaign> {
     return prisma.campaign.update({ where: { slug }, data: { status } });
   },
+
+  create(campaign: Omit<Campaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<Campaign> {
+    return prisma.campaign.create({
+      data: {
+        slug: campaign.slug,
+        title: campaign.title,
+        rules: campaign.rules as never,
+        codePrefix: campaign.codePrefix ?? null,
+        status: campaign.status,
+      },
+    });
+  },
 };
