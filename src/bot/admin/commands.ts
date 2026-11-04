@@ -1,20 +1,23 @@
 import { Composer } from 'telegraf';
 import type { AppContext } from '../context.js';
+
+import { listStrategyTypes, resolveStrategy, validateCampaignRules } from '../../domain/rules/index.js';
+
+import { env } from '../../config/env.js';
+
 import { campaignRepo } from '../../db/repositories/campaign.repo.js';
 import { codeRepo } from '../../db/repositories/code.repo.js';
 import { prisma } from '../../db/client.js';
-import { isAdmin, isSuperAdmin } from './guard.js';
 import { contentRepo } from '../../db/repositories/content.repo.js';
-import { buildCampaignWorkbook } from '../../domain/export/xlsx.service.js';
-import { formatIsoDate } from '../../shared/datetime.js';
-import { invalidateContentCache } from '../../domain/content/content.service.js';
-import type { ContentKey } from '../../domain/content/keys.js';
+
+import { isAdmin, isSuperAdmin } from './guard.js';
 import { replyCampaignNotFound } from './campaign-helpers.js';
 import { parseTelegramError } from '../../infra/telegram-errors.js';
-import { logger } from '../../infra/logger.js';
-import { env } from '../../config/env.js';
-import { listStrategyTypes, resolveStrategy, validateCampaignRules } from '../../domain/rules/index.js';
-import type { CampaignStatus } from '../../generated/prisma/client.js';
+import { formatIsoDate } from '../../shared/datetime.js';
+
+import { buildCampaignWorkbook } from '../../domain/export/xlsx.service.js';
+import { invalidateContentCache } from '../../domain/content/content.service.js';
+import type { ContentKey } from '../../domain/content/keys.js';
 
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -230,16 +233,15 @@ adminCommands.command('export', async (ctx) => {
   }
 });
 
-// Створює нову кампанію: /create_campaign <slug> <назва> <стратегія>
+// Створює кампанію з правилами-заглушкою: /create_campaign <slug> <стратегія> <назва>
 adminCommands.command('create_campaign', async (ctx) => {
   if (!(await isSuperAdmin(ctx.from.id))) return;
 
-  const slug = ctx.message.text.split(/\s+/)[1];
-  const title = ctx.message.text.split(/\s+/)[2];
-  const strategy = ctx.message.text.split(/\s+/)[3];
+  const [, slug, strategy, ...titleParts] = ctx.message.text.trim().split(/\s+/);
+  const title = titleParts.join(' ');
 
-  if (!slug || !title || !strategy) {
-    await ctx.reply('Використання: /create_campaign <slug> <назва> <стратегія>');
+  if (!slug || !strategy || !title) {
+    await ctx.reply('Використання: /create_campaign <slug> <стратегія> <назва>');
     return;
   }
 
@@ -257,18 +259,40 @@ adminCommands.command('create_campaign', async (ctx) => {
     return;
   }
 
-  const rules = validateCampaignRules({ strategies: [{ type: strategy, config: {} }] });
+  const rules = validateCampaignRules({
+    strategies: [{ type: strategy, config: resolveStrategy(strategy).defaultConfig }],
+  });
 
   await campaignRepo.create({
     slug,
     title,
-    rules: { strategies: [{ type: strategy, config: {} }] } as never,
-    status: 'DRAFT' as CampaignStatus,
+    rules: rules as never,
+    status: 'DRAFT',
     startsAt: null,
     endsAt: null,
     adminThreadId: null,
-    codePrefix: null
+    codePrefix: null,
   });
 
-  ctx.createForumTopic(title);
+  if (env.ADMIN_CHAT_ID === undefined) {
+    await ctx.reply(`✅ Кампанію «${title}» створено, але ADMIN_CHAT_ID не заданий - топік не створено.`);
+    return;
+  }
+
+  try {
+    const topic = await ctx.telegram.createForumTopic(
+      env.ADMIN_CHAT_ID.toString(),
+      title.slice(0, 128),
+    );
+    await campaignRepo.bindAdminThread(slug, topic.message_thread_id);
+    await ctx.reply(`✅ Кампанія «${title}» створена та топік прив'язано.`);
+  } catch (error) {
+    ctx.log?.error({ error, slug }, 'не вдалося створити топік');
+    const info = parseTelegramError(error);
+    await ctx.reply(
+      '⚠️ Кампанію створено, а топік - ні' +
+        (info ? ` (Telegram ${info.code}: ${info.description})` : '') +
+        `.\nСтвори топік вручну і виконай у ньому /bind_topic ${slug}`
+    );
+  }
 });

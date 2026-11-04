@@ -37,5 +37,7 @@ export type StrategyResult = {
 export interface PrizeStrategy<TConfig = unknown> {
   readonly type: string;
   readonly configSchema: z.ZodType<TConfig>;
+  /** Нейтральний конфіг-заглушка: проходить схему і нічого не видає */
+  readonly defaultConfig: TConfig;
   evaluate(ctx: RuleContext, config: TConfig): RuleAward[];
 }

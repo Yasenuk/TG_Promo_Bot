@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateAwards, validateCampaignRules } from '../../../src/domain/rules/engine.js';
 import { ctx, prize } from './helpers.js';
+import { listStrategyTypes, resolveStrategy } from '../../../src/domain/rules/registry.js';
 
 describe('fixed-threshold', () => {
   const rules = {
@@ -122,4 +123,23 @@ describe('validateCampaignRules', () => {
   it('падає на порожньому списку стратегій', () => {
     expect(() => validateCampaignRules({ strategies: [] })).toThrow();
   });
+});
+
+describe('defaultConfig', () => {
+  for (const type of listStrategyTypes()) {
+    const rules = { strategies: [{ type, config: resolveStrategy(type).defaultConfig }] };
+
+    it(`${type}: проходить валідацію`, () => {
+      expect(() => validateCampaignRules(rules)).not.toThrow();
+    });
+
+    it(`${type}: нічого не видає й не пише в outOfStock`, () => {
+      for (let count = 1; count <= 20; count++) {
+        // random = 0 — найгірший випадок для instant-win
+        const result = evaluateAwards(ctx(count, [], () => 0), rules);
+        expect(result.awards).toHaveLength(0);
+        expect(result.outOfStock).toHaveLength(0);
+      }
+    });
+  }
 });

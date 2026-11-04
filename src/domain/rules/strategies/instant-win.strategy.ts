@@ -17,6 +17,7 @@ export type InstantWinConfig = z.infer<typeof configSchema>;
 export const instantWinStrategy: PrizeStrategy<InstantWinConfig> = {
   type: 'instant-win',
   configSchema,
+  defaultConfig: { chance: 0, prize: '' },
   evaluate(ctx, config) {
     if (ctx.random() >= config.chance) return [];
     return [

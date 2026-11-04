@@ -21,6 +21,7 @@ export type CyclicThresholdConfig = z.infer<typeof configSchema>;
 export const cyclicThresholdStrategy: PrizeStrategy<CyclicThresholdConfig> = {
   type: 'cyclic-threshold',
   configSchema,
+  defaultConfig: { cycleLength: 1, awards: {} },
   evaluate(ctx, config) {
     if (ctx.activationCount <= 0) return [];
 

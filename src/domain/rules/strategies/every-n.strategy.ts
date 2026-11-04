@@ -15,7 +15,10 @@ export type EveryNConfig = z.infer<typeof configSchema>;
 export const everyNStrategy: PrizeStrategy<EveryNConfig> = {
   type: 'every-n',
   configSchema,
+  defaultConfig: { n: 1, prize: '' },
   evaluate(ctx, config) {
+    // порожній prize = стратегія вимкнена (заглушка)
+    if (!config.prize) return [];
     if (ctx.activationCount <= 0) return [];
     if (ctx.activationCount % config.n !== 0) return [];
     return [

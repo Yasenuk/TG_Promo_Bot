@@ -19,6 +19,7 @@ export type FixedThresholdConfig = z.infer<typeof configSchema>;
 export const fixedThresholdStrategy: PrizeStrategy<FixedThresholdConfig> = {
   type: 'fixed-threshold',
   configSchema,
+  defaultConfig: { thresholds: [] },
   evaluate(ctx, config) {
     return config.thresholds
       .filter((t) => t.at === ctx.activationCount)
