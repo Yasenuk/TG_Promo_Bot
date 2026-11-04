@@ -33,8 +33,14 @@ export const campaignRepo = {
   },
 
   create(campaign: Omit<Campaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<Campaign> {
-    return prisma.campaign.create({
-      data: {
+    return prisma.campaign.upsert({
+      where: { slug: campaign.slug },
+      update: {
+        title: campaign.title,
+        rules: campaign.rules as never,
+        codePrefix: campaign.codePrefix ?? null,
+      },
+      create: {
         slug: campaign.slug,
         title: campaign.title,
         rules: campaign.rules as never,

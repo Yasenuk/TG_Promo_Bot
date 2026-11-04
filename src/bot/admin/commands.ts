@@ -13,7 +13,7 @@ import { replyCampaignNotFound } from './campaign-helpers.js';
 import { parseTelegramError } from '../../infra/telegram-errors.js';
 import { logger } from '../../infra/logger.js';
 import { env } from '../../config/env.js';
-import { listStrategyTypes, resolveStrategy } from '../../domain/rules/index.js';
+import { listStrategyTypes, resolveStrategy, validateCampaignRules } from '../../domain/rules/index.js';
 import type { CampaignStatus } from '../../generated/prisma/client.js';
 
 const escapeHtml = (s: string): string =>
@@ -256,6 +256,8 @@ adminCommands.command('create_campaign', async (ctx) => {
     await ctx.reply(`❌ Кампанія зі slug «${slug}» вже існує.`);
     return;
   }
+
+  const rules = validateCampaignRules({ strategies: [{ type: strategy, config: {} }] });
 
   await campaignRepo.create({
     slug,
