@@ -1,8 +1,7 @@
 import { Composer } from 'telegraf';
 import type { AppContext } from '../context.js';
 
-import { z } from 'zod';
-import { listStrategyTypes, validateCampaignRules, type CampaignRules } from '../../domain/rules/index.js';
+import { formatConfigError, listStrategyTypes, validateCampaignRules, type CampaignRules } from '../../domain/rules/index.js';
 
 import { env } from '../../config/env.js';
 
@@ -19,6 +18,7 @@ import { formatIsoDate } from '../../shared/datetime.js';
 import { buildCampaignWorkbook } from '../../domain/export/xlsx.service.js';
 import { invalidateContentCache } from '../../domain/content/content.service.js';
 import type { ContentKey } from '../../domain/content/keys.js';
+import { prizeService } from '../../domain/prizes/prize.service.js';
 
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -269,13 +269,7 @@ adminCommands.command('create_campaign', async (ctx) => {
       strategies: [{ type: strategy, config: JSON.parse(rawConfig) }],
     });
   } catch (error) {
-    const reason =
-      error instanceof z.ZodError
-        ? z.prettifyError(error)
-        : error instanceof Error
-          ? error.message // SyntaxError від JSON.parse
-          : String(error);
-    await ctx.reply(`❌ Кривий конфіг для «${strategy}»:\n\n${reason}`);
+    await ctx.reply(`❌ Кривий конфіг:\n\n${formatConfigError(error)}`);
     return;
   }
 
@@ -319,46 +313,59 @@ adminCommands.command('create_campaign', async (ctx) => {
 adminCommands.command('update_campaign', async (ctx) => {
   if (!(await isSuperAdmin(ctx.from.id))) return;
 
-  const [firstLine = '', ...configLines] = ctx.message.text.split('\n');
-  const [, slug, strategyType = ''] = firstLine.trim().split(/\s+/);
-  const rawConfig = configLines.join('\n').trim();
+  const [firstLine = '', ...RulesLines] = ctx.message.text.split('\n');
+  const [, slug] = firstLine.trim().split(/\s+/);
+  const rawRules = RulesLines.join('\n').trim();
 
-  if (!slug || !rawConfig) {
+  if (!slug) {
     await ctx.reply(
-      'Використання:\n/update_campaign <slug> [<стратегія>] \n[<JSON-конфіг з нового рядка>]',
+      'Використання:\n/update_campaign <slug>\n<повний JSON правил з нового рядка>',
     );
     return;
   }
   
-  const campaignRules = await campaignRepo.findBySlug(slug).catch(() => null).then(c => c?.rules);
-  if (!campaignRules) {
+  const campaign = await campaignRepo.findBySlug(slug);
+  if (!campaign) {
     await replyCampaignNotFound(ctx, slug);
     return;
   }
-  
-  const campaignRulesType = strategyType ||
-    JSON.parse(JSON.stringify(campaignRules)).strategies[0].type;
 
-  let rules: CampaignRules;
-  try {
-    rules = validateCampaignRules({
-      strategies: [{ type: campaignRulesType, config: JSON.parse(rawConfig) }],
-    });
-  } catch (error) {
-    const reason =
-      error instanceof z.ZodError
-        ? z.prettifyError(error)
-        : error instanceof Error
-          ? error.message // SyntaxError від JSON.parse
-          : String(error);
-    await ctx.reply(`❌ Кривий конфіг для «${campaignRulesType}»:\n\n${reason}`);
+  if (!rawRules) {
+    await ctx.reply(`<pre>${escapeHtml(JSON.stringify(campaign.rules, null, 2))}</pre>`,
+      { parse_mode: 'HTML' },
+    );
     return;
   }
 
-  await prisma.campaign.update({
-    where: { slug },
-    data: { rules: rules as never },
-  });
+  let rules: CampaignRules;
+  try {
+    rules = validateCampaignRules(JSON.parse(rawRules));
+  } catch (error) {
+    await ctx.reply(`❌ Кривий конфіг:\n\n${formatConfigError(error)}`);
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.campaign.update({
+      where: { slug },
+      data: { rules: rules as never },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorId: BigInt(ctx.from.id),
+        action: 'campaign.rules_changed',
+        entityType: 'Campaign',
+        entityId: campaign.id,
+        payload: { before: campaign.rules, after: rules } as never,
+      },
+    }),
+  ]);
+
+  const { missing } = await prizeService.checkAgainstRules({ id: campaign.id, rules: rules });
   
-  await ctx.reply(`✅ Конфіг кампанії «${campaignRulesType}» оновлено.`);
+  await ctx.reply(
+    `✅ Правила «${campaign.title}» оновлено: ${rules.strategies.map((s) => s.type).join(', ')}` +
+      (campaign.status === 'ACTIVE' ? '\n⚠️ Кампанія активна - діє з наступної активації' : '') +
+      (missing.length ? `\n⚠️ Немає призів: ${missing.join(', ')}` : ''),
+  );
 });

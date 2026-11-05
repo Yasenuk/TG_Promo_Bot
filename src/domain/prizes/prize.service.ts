@@ -203,7 +203,7 @@ export const prizeService = {
     return ok({ deleted: free.map((p) => p.key), closed: inUse.map((p) => p.key) });
   },
 
-  async checkAgainstRules(campaign: Pick<Campaign, 'id' | 'rules'>): Promise<RulesCheck> {
+  async checkAgainstRules(campaign: { id: string; rules: unknown }): Promise<RulesCheck> {
     const referenced = prizeKeysReferencedByRules(campaign.rules);
     const prizes = await prisma.prize.findMany({
       where: { campaignId: campaign.id },

@@ -24,6 +24,14 @@ export function validateCampaignRules(raw: unknown): CampaignRules {
   return rules;
 }
 
+export function formatConfigError(error: unknown): string {
+  return error instanceof z.ZodError
+    ? z.prettifyError(error)
+    : error instanceof Error
+      ? error.message // SyntaxError від JSON.parse
+      : String(error);
+}
+
 /**
  * Ключі призів, на які посилаються правила кампанії
  * Сирий JSON із БД; невалідні записи просто пропускаються
