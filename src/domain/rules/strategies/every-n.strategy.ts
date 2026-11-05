@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { PrizeStrategy } from '../types.js';
 
 /**
- * Кожні N кодів — той самий приз.
+ * Кожні N кодів - той самий приз.
  *   n: 3, prize: "sticker"
  */
 const configSchema = z.object({

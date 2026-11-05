@@ -2,12 +2,12 @@ import { z } from 'zod';
 import type { PrizeStrategy } from '../types.js';
 
 /**
- * Циклічні пороги — механіка Hype.
+ * Циклічні пороги.
  *
- *   cycleLength: 6, awards: { "2": "opener", "4": "mug", "0": "cap" }
- *   → 2, 8, 14  = відкривачка
- *   → 4, 10, 16 = кружка
- *   → 6, 12, 18 = кепка (залишок 0)
+ *   cycleLength: 6, awards: { "2": "prize 1", "4": "prize 2", "0": "prize 3" }
+ *   → 2, 8, 14  = prize 1
+ *   → 4, 10, 16 = prize 2
+ *   → 6, 12, 18 = prize 3 (залишок 0)
  *
  * Ключ awards — це activationCount % cycleLength.
  */
