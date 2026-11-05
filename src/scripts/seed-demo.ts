@@ -25,7 +25,7 @@ async function main(): Promise<void> {
     update: { status: 'ACTIVE', codePrefix: 'TEST' },
     create: {
       slug: SLUG,
-      title: 'DEMO — тестова акція',
+      title: 'DEMO - тестова акція',
       status: 'ACTIVE',
       codePrefix: 'TEST',
       rules: {
@@ -86,7 +86,7 @@ async function main(): Promise<void> {
   console.log(`
 ✅ Демо-кампанія готова
 
-   Кампанія:  ${campaign.title} (${campaign.slug}) — ACTIVE
+   Кампанія:  ${campaign.title} (${campaign.slug}) - ACTIVE
    Коди:      ${makeCode(1)} … ${makeCode(CODE_COUNT)}  (нових: ${created})
    Призи:     відкривачка ×2, кружка ×1, кепка ∞
    Магазини:  10 у Києві (перевірка пагінації)

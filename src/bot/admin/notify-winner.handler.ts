@@ -86,7 +86,7 @@ notifyWinnerHandler.on('callback_query', async (ctx, next) => {
 
 /**
  * Крок 2: відповідь на те саме повідомлення.
- * takePending повертає not_owner, якщо відповів хтось інший — тоді мовчки далі.
+ * takePending повертає not_owner, якщо відповів хтось інший - тоді мовчки далі.
  */
 notifyWinnerHandler.on(message('text'), async (ctx, next) => {
   if (ctx.chat.type === 'private') return next();

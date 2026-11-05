@@ -173,7 +173,7 @@ async function handleFileAs(
     await ctx.answerCbQuery(
       entry.reason === 'not_owner'
         ? 'Це файл іншого адміна'
-        : 'Файл застарів — надішли ще раз',
+        : 'Файл застарів - надішли ще раз',
       { show_alert: true },
     );
     return;
@@ -246,7 +246,7 @@ async function handleFileCampaign(
   const entry = await readPending<FilePending>('file', pendingId, ctx.from!.id);
 
   if (!entry.ok) {
-    await ctx.answerCbQuery('Файл застарів — надішли ще раз', { show_alert: true });
+    await ctx.answerCbQuery('Файл застарів - надішли ще раз', { show_alert: true });
     return;
   }
 
@@ -280,7 +280,7 @@ importHandler.command(['import_stores', 'import_codes'], async (ctx) => {
   await ctx.reply(
     '📎 <b>Команду треба писати в підписі до файлу</b>, не окремо.\n\n' +
       '<b>Магазини:</b> колонки місто, назва, адреса\n' +
-      '<code>/import_stores slug</code> — ще й прив’яже магазини до кампанії\n' +
+      '<code>/import_stores slug</code> - ще й прив’яже магазини до кампанії\n' +
       '<b>Коди:</b> колонку з кодами бот знайде сам, заголовки й «№» не заважають\n\n' +
       'Формати: .csv, .xlsx (до 20 МБ)',
     { parse_mode: 'HTML' },
@@ -454,7 +454,7 @@ export async function confirmStoresImport(
     await ctx.answerCbQuery(
       taken.reason === 'not_owner'
         ? 'Підтвердити може лише той, хто надіслав файл'
-        : 'Термін підтвердження минув — надішли файл ще раз',
+        : 'Термін підтвердження минув - надішли файл ще раз',
       { show_alert: true },
     );
     return;
@@ -487,7 +487,7 @@ export async function confirmCodesImport(
     await ctx.answerCbQuery(
       taken.reason === 'not_owner'
         ? 'Підтвердити може лише той, хто надіслав файл'
-        : 'Термін підтвердження минув — надішли файл ще раз',
+        : 'Термін підтвердження минув - надішли файл ще раз',
       { show_alert: true },
     );
     return;

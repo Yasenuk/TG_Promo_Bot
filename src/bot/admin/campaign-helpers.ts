@@ -9,7 +9,7 @@ export async function replyCampaignNotFound(
 
   if (campaigns.length === 0) {
     await ctx.reply(
-      `❌ Кампанії «${slug}» немає — як і жодної іншої.\n\n` +
+      `❌ Кампанії «${slug}» немає - як і жодної іншої.\n\n` +
         'Створити першу (у терміналі, бо там JSON із правилами):\n\n' +
         '<code>npm run campaign:create -- --slug=name --title="title" \\\n' +
         '  --prefix=XX --rules=./rules/<slug>.json --prizes=./rules/<slug>-prizes.json</code>\n\n' +
@@ -20,7 +20,7 @@ export async function replyCampaignNotFound(
   }
 
   const list = campaigns
-    .map((c) => `${c.status === 'ACTIVE' ? '🟢' : '⚪️'} <code>${c.slug}</code> — ${c.title}`)
+    .map((c) => `${c.status === 'ACTIVE' ? '🟢' : '⚪️'} <code>${c.slug}</code> - ${c.title}`)
     .join('\n');
 
   await ctx.reply(`❌ Кампанії «${slug}» немає.\n\n<b>Наявні:</b>\n${list}`, {

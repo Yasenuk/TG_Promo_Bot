@@ -56,7 +56,7 @@ describe('extractCodeLines', () => {
     expect(lines[0]).toBe('ABCDE00001');
   });
 
-  it('сміття ПІСЛЯ першого коду лишає — його порахують як некоректне', () => {
+  it('сміття ПІСЛЯ першого коду лишає - його порахують як некоректне', () => {
     const { lines } = extractCodeLines([['код'], ['AAAA1111'], ['Разом'], ['BBBB2222']]);
     expect(lines).toEqual(['AAAA1111', 'Разом', 'BBBB2222']);
   });

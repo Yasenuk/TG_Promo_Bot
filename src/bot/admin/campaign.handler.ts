@@ -44,9 +44,9 @@ campaignHandler.command('campaign', async (ctx) => {
   if (!action || !slug) {
     await ctx.reply(
       'Використання:\n' +
-        '<code>/campaign activate hype</code> — почати приймати коди\n' +
-        '<code>/campaign pause hype</code> — призупинити\n' +
-        '<code>/campaign finish hype</code> — завершити акцію\n\n' +
+        '<code>/campaign activate hype</code> - почати приймати коди\n' +
+        '<code>/campaign pause hype</code> - призупинити\n' +
+        '<code>/campaign finish hype</code> - завершити акцію\n\n' +
         'Список: /campaigns',
       { parse_mode: 'HTML' },
     );
@@ -82,7 +82,7 @@ campaignHandler.command('campaign', async (ctx) => {
     if (codes === 0) warnings.push('⚠️ У кампанії немає вільних кодів');
     if (prizes === 0) warnings.push('⚠️ У кампанії не заведено призів');
     if (!campaign.adminThreadId) {
-      warnings.push('⚠️ Топік не прив’язано — заявки підуть у General');
+      warnings.push('⚠️ Топік не прив’язано - заявки підуть у General');
     }
   }
 

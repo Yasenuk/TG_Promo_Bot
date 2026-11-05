@@ -30,10 +30,10 @@ prizeHandler.on('callback_query', async (ctx, next) => {
   if (claim.status !== 'AWAITING_STORE') {
     await ctx.editMessageReplyMarkup(undefined).catch(() => undefined);
     await ctx.reply_t('prize.confirmed', {
-      store: claim.store?.name ?? '—',
+      store: claim.store?.name ?? '-',
       city: claim.store?.city.name ?? '',
       address: claim.store?.address ?? '',
-      place: claim.store ? formatStorePlace(claim.store) : '—',
+      place: claim.store ? formatStorePlace(claim.store) : '-',
     });
     return;
   }
@@ -54,7 +54,7 @@ export async function showMyPrizes(ctx: AppContext): Promise<void> {
   const chooseStore = await contentService.t('button.choose_store');
 
   for (const claim of claims) {
-    const place = claim.store ? formatStorePlace(claim.store) : '—';
+    const place = claim.store ? formatStorePlace(claim.store) : '-';
 
     const status = ((): string => {
       switch (claim.status) {
@@ -67,11 +67,11 @@ export async function showMyPrizes(ctx: AppContext): Promise<void> {
         case 'RECEIVED':
           return '🎉 отримано';
         default:
-          return '—';
+          return '-';
       }
     })();
 
-    const line = `🎁 ${claim.prize.title} — ${claim.campaign.title}\n${status}`;
+    const line = `🎁 ${claim.prize.title} - ${claim.campaign.title}\n${status}`;
 
     if (claim.status === 'AWAITING_STORE') {
       await ctx.reply(
@@ -91,7 +91,7 @@ export async function showMyPrizes(ctx: AppContext): Promise<void> {
   }
 }
 
-/** «Мій прогрес» — по кожній кампанії окремо, лічильники не змішуються */
+/** «Мій прогрес» - по кожній кампанії окремо, лічильники не змішуються */
 export async function showMyProgress(ctx: AppContext): Promise<void> {
   const participations = await codeService.progress(ctx.user.id);
 

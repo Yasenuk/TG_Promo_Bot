@@ -149,8 +149,8 @@ export type StoreImportResult = {
 /**
  * Застосування імпорту
  *
- * campaignId — прив'язати всі магазини з файлу до кампанії (CampaignStore).
- * null — глобальний імпорт, без прив'язки.
+ * campaignId - прив'язати всі магазини з файлу до кампанії (CampaignStore).
+ * null - глобальний імпорт, без прив'язки.
  */
 export async function applyStoreImport(
   preview: StoreImportPreview,
@@ -164,7 +164,7 @@ export async function applyStoreImport(
     storesLinked: 0,
   };
 
-  /** id усіх магазинів із файлу — і нових, і тих, що вже були */
+  /** id усіх магазинів із файлу - і нових, і тих, що вже були */
   const storeIds: string[] = [];
 
   const cityIds = new Map<string, string>();
@@ -229,7 +229,7 @@ export async function applyStoreImport(
     result.placeholdersCreated++;
   }
 
-  // плейсхолдери (міста без адрес) не прив'язуємо — вони неактивні
+  // плейсхолдери (міста без адрес) не прив'язуємо - вони неактивні
   if (campaignId) {
     result.storesLinked = await storeRepo.linkToCampaign(campaignId, storeIds);
   }

@@ -28,7 +28,7 @@ confirmHandler.on('callback_query', async (ctx, next) => {
   if (!kind) {
     ctx.log?.warn({ pendingId: action.pendingId }, 'підтвердження не знайдено');
     await ctx.answerCbQuery(
-      'Термін підтвердження минув — повтори команду',
+      'Термін підтвердження минув - повтори команду',
       { show_alert: true },
     );
     await ctx.editMessageReplyMarkup(undefined).catch(() => undefined);

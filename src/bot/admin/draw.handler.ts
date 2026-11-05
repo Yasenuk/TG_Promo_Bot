@@ -40,7 +40,7 @@ drawHandler.command('draw', async (ctx) => {
     await ctx.reply(
       'Використання:\n' +
         '<code>/draw <slug> tv:1 phone:3</code>\n\n' +
-        '<code>--repeat</code> — дозволити одній людині виграти кілька призів\n\n' +
+        '<code>--repeat</code> - дозволити одній людині виграти кілька призів\n\n' +
         'Переглянути ключі призів: /prizes <slug>',
       { parse_mode: 'HTML' },
     );
@@ -65,7 +65,7 @@ drawHandler.command('draw', async (ctx) => {
     if (!prize) {
       await ctx.reply(
         `❌ Приз «${key}» не заведений у кампанії.\n` +
-          `Наявні: ${available.map((p) => p.key).join(', ') || '—'}`,
+          `Наявні: ${available.map((p) => p.key).join(', ') || '-'}`,
       );
       return;
     }
@@ -80,7 +80,7 @@ drawHandler.command('draw', async (ctx) => {
   const tickets = await drawService.loadTickets(campaign.id);
 
   if (tickets.length === 0) {
-    await ctx.reply('❌ Немає жодної активації — нема серед кого розігрувати');
+    await ctx.reply('❌ Немає жодної активації - нема серед кого розігрувати');
     return;
   }
 
@@ -121,7 +121,7 @@ drawHandler.command('draw', async (ctx) => {
 
   for (const [i, w] of plan.winners.slice(0, 25).entries()) {
     lines.push(
-      `${i + 1}. ${esc(w.prizeTitle)} — ${esc(w.fullName ?? '?')} ` +
+      `${i + 1}. ${esc(w.prizeTitle)} - ${esc(w.fullName ?? '?')} ` +
         `${w.phone ? esc(formatPhone(w.phone)) : ''}`,
     );
   }
@@ -175,7 +175,7 @@ drawHandler.command('prizes', async (ctx) => {
   const lines = prizes.map((p) => {
     const left = p.stock === null ? '∞' : String(p.stock - p.issued - p.reserved);
     return (
-      `<code>${p.key}</code> — ${esc(p.title)}\n` +
+      `<code>${p.key}</code> - ${esc(p.title)}\n` +
       `   видано ${p.issued} · резерв ${p.reserved} · лишилось ${left}`
     );
   });
@@ -198,7 +198,7 @@ export async function confirmDraw(
     await ctx.answerCbQuery(
       taken.reason === 'not_owner'
         ? 'Зафіксувати може лише той, хто запустив розіграш'
-        : 'Термін підтвердження минув — запусти /draw ще раз',
+        : 'Термін підтвердження минув - запусти /draw ще раз',
       { show_alert: true },
     );
     return;
@@ -281,7 +281,7 @@ export async function confirmDraw(
   });
 
   const summary = [
-    `📣 <b>Розсилка завершена</b> — ${esc(campaignTitle)}`,
+    `📣 <b>Розсилка завершена</b> - ${esc(campaignTitle)}`,
     '',
     `✅ Надіслано: ${result.sent}`,
     result.blocked ? `🚫 Заблокували бота: ${result.blocked}` : '',
@@ -291,7 +291,7 @@ export async function confirmDraw(
   if (result.blocked > 0) {
     summary.push(
       '',
-      '<i>Тих, хто заблокував бота, шукайте за телефоном у /export — ' +
+      '<i>Тих, хто заблокував бота, шукайте за телефоном у /export - ' +
         'приз за ними лишається.</i>',
     );
   }

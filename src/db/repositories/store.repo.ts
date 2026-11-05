@@ -5,7 +5,7 @@ export const storeRepo = {
   /**
    * Міста, де для цієї кампанії є хоч один активний магазин
    *
-   * Якщо для кампанії не заведено жодного CampaignStore — доступні всі
+   * Якщо для кампанії не заведено жодного CampaignStore - доступні всі
    * активні магазини
    */
   async listCitiesForCampaign(campaignId: string): Promise<City[]> {

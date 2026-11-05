@@ -14,7 +14,7 @@ export const userRepo = {
 
   /**
    * Створює юзера при першому контакті або освіжає username
-   * Знімає прапорець isBlocked: якщо людина знову пише — бот не заблокований
+   * Знімає прапорець isBlocked: якщо людина знову пише - бот не заблокований
    */
   async upsertFromTelegram(identity: TelegramIdentity): Promise<User> {
     const { telegramId, username } = identity;

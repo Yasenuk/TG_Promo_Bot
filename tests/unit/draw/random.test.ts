@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createSeededRandom, shuffle } from '../../../src/domain/draw/random.js';
 
 describe('seeded random', () => {
-  it('той самий seed — та сама послідовність', () => {
+  it('той самий seed - та сама послідовність', () => {
     const a = createSeededRandom('seed-123');
     const b = createSeededRandom('seed-123');
 
@@ -11,7 +11,7 @@ describe('seeded random', () => {
     }
   });
 
-  it('різні seed — різні послідовності', () => {
+  it('різні seed - різні послідовності', () => {
     const a = createSeededRandom('seed-a');
     const b = createSeededRandom('seed-b');
 
@@ -30,7 +30,7 @@ describe('seeded random', () => {
     }
   });
 
-  it('розподіл рівномірний — жоден дециль не порожній і не роздутий', () => {
+  it('розподіл рівномірний - жоден дециль не порожній і не роздутий', () => {
     const random = createSeededRandom('uniform');
     const buckets = new Array<number>(10).fill(0);
 

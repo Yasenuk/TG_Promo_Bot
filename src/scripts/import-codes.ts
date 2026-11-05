@@ -100,7 +100,7 @@ async function main(): Promise<void> {
  
   console.log(`\n📄 Файл:        ${args.file}`);
   console.log(`🎯 Кампанія:    ${campaign.title} (${campaign.slug})`);
-  console.log(`📦 Партія:      ${args.batch ?? '—'}`);
+  console.log(`📦 Партія:      ${args.batch ?? '-'}`);
   console.log(`🔎 Колонка:     ${columnLetter(column)}`);
   console.log(`\n✅ Готові до імпорту: ${fresh.length}`);
   if (collisions.length) console.log(`⚠️  Вже існують:      ${collisions.length}`);
@@ -115,7 +115,7 @@ async function main(): Promise<void> {
   }
  
   if (args.dryRun) {
-    console.log('\n🔍 dry-run — нічого не записано.');
+    console.log('\n🔍 dry-run - нічого не записано.');
     return;
   }
  

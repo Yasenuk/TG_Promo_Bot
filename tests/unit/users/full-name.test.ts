@@ -28,12 +28,12 @@ describe('validateFullName', () => {
     expect(validateFullName('Іваненко Іван #1').ok).toBe(false);
   });
 
-  it('латиниця дозволена — \\p{L} це будь-яка літера', () => {
+  it('латиниця дозволена - \\p{L} це будь-яка літера', () => {
     expect(validateFullName('John Smith').ok).toBe(true);
     expect(validateFullName('Anna Maria Kowalska').ok).toBe(true);
   });
 
-  it('ініціали не приймаються — потрібне повне ПІБ', () => {
+  it('ініціали не приймаються - потрібне повне ПІБ', () => {
     expect(validateFullName('Іваненко І').ok).toBe(false);
     expect(validateFullName('Іваненко І І').ok).toBe(false);
     expect(validateFullName('a b').ok).toBe(false);

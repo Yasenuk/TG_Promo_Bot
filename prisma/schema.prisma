@@ -82,7 +82,7 @@ model User {
 }
 
 /// Участь конкретного юзера в конкретній кампанії
-/// Лічильник активацій — ПО КАМПАНІЇ
+/// Лічильник активацій - ПО КАМПАНІЇ
 model Participation {
   id         String @id @default(cuid())
   userId     String
@@ -103,7 +103,7 @@ model Participation {
 // КОДИ ТА АКТИВАЦІЇ
 // ─────────────────────────────────────────────
 
-/// Перевірка колізій — на імпорті.
+/// Перевірка колізій - на імпорті.
 model Code {
   id         String @id @default(cuid())
   campaignId String
@@ -157,7 +157,7 @@ enum PrizeKind {
 model Prize {
   id         String    @id @default(cuid())
   campaignId String
-  key        String // "opener", "mug", "cap" — цим оперує rules engine
+  key        String // "opener", "mug", "cap" - цим оперує rules engine
   title      String
   kind       PrizeKind @default(GUARANTEED)
   sortOrder  Int       @default(0)
@@ -248,7 +248,7 @@ model PrizeClaim {
   activationId String? @unique
   drawWinnerId String? @unique
 
-  /// куди відправлено сповіщення в адмін-групу — щоб редагувати те саме повідомлення
+  /// куди відправлено сповіщення в адмін-групу - щоб редагувати те саме повідомлення
   adminChatId    BigInt?
   adminMessageId Int?
 

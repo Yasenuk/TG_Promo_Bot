@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     const telegramId = BigInt(meArg.slice(5));
     await prisma.user
       .delete({ where: { telegramId } })
-      .then(() => console.log(`✅ Профіль ${telegramId} видалено — реєстрація з нуля`))
+      .then(() => console.log(`✅ Профіль ${telegramId} видалено - реєстрація з нуля`))
       .catch(() => console.log(`ℹ️  Профіль ${telegramId} не знайдено`));
   }
 

@@ -18,10 +18,10 @@ function buildClaimMessage(claim: ClaimFull): string {
   const store = claim.store;
 
   const username = user.username ? ` (@${esc(user.username)})` : '';
-  const phone = user.phone ? formatPhone(user.phone) : '—';
+  const phone = user.phone ? formatPhone(user.phone) : '-';
 
   const lines = [
-    `🎁 <b>Нова заявка</b> — ${esc(claim.campaign.title)}`,
+    `🎁 <b>Нова заявка</b> - ${esc(claim.campaign.title)}`,
     '',
     `👤 ${esc(user.fullName ?? 'без імені')}${username}`,
     `📞 ${esc(phone)}`,
@@ -79,7 +79,7 @@ export async function notifyAdminsAboutClaim(
   if (chatId === undefined) {
     logger.error(
       { claimId: claim.id },
-      '⚠️ ADMIN_CHAT_ID не заданий — заявку нікому надіслати. Виконай /chatid у групі.',
+      '⚠️ ADMIN_CHAT_ID не заданий - заявку нікому надіслати. Виконай /chatid у групі.',
     );
     return;
   }
@@ -114,7 +114,7 @@ export async function notifyAdminsAboutClaim(
 
     logger.error(
       { claimId: claim.id, threadId, campaign: claim.campaign.slug },
-      '⚠️ топік кампанії недоступний — шлемо в General, перепривʼяжи через /bind_topic',
+      '⚠️ топік кампанії недоступний - шлемо в General, перепривʼяжи через /bind_topic',
     );
 
     try {
@@ -144,7 +144,7 @@ export async function markClaimMessageDelivered(
   const text = [
     buildClaimMessage(claim),
     '',
-    `✅ <b>Видано</b> — ${esc(managerName)}`,
+    `✅ <b>Видано</b> - ${esc(managerName)}`,
     `🕐 ${formatDateTime(claim.deliveredAt ?? new Date())}`,
   ].join('\n');
 

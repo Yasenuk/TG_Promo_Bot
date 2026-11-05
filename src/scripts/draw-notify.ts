@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   const pending = draw.winners.filter((w) => w.notifiedAt === null);
 
   console.log(`
-📣 ${draw.name} — ${draw.campaign.title}
+📣 ${draw.name} - ${draw.campaign.title}
    Переможців: ${draw.winners.length}
    До сповіщення: ${pending.length} (решту вже сповіщено)
 `);
@@ -81,7 +81,7 @@ async function main(): Promise<void> {
               : undefined,
           );
 
-          // Позначаємо одразу після успіху — повторний запуск не задублює
+          // Позначаємо одразу після успіху - повторний запуск не задублює
           await prisma.drawWinner.update({
             where: { id: winner.id },
             data: { notifiedAt: new Date() },
@@ -116,7 +116,7 @@ async function main(): Promise<void> {
   if (result.blocked > 0) {
     console.log(
       '   Тих, хто заблокував бота, доведеться шукати за телефоном ' +
-        'із вигрузки — приз за ними лишається.\n',
+        'із вигрузки - приз за ними лишається.\n',
     );
   }
 }

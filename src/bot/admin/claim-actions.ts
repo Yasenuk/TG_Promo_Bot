@@ -58,9 +58,9 @@ claimActions.on('callback_query', async (ctx, next) => {
     {
       prize: claim.prize.title,
       city: claim.store?.city.name ?? '',
-      store: claim.store?.name ?? '—',
+      store: claim.store?.name ?? '-',
       address: claim.store?.address ?? '',
-      place: claim.store ? formatStorePlace(claim.store) : '—',
+      place: claim.store ? formatStorePlace(claim.store) : '-',
     },
     { campaignId: claim.campaignId },
   );

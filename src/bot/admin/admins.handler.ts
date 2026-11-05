@@ -13,7 +13,7 @@ const esc = (s: string): string =>
 const USAGE = [
   '👥 <b>Керування доступами</b>',
   '',
-  '<b>Додати менеджера</b> — відповідай на його повідомлення:',
+  '<b>Додати менеджера</b> - відповідай на його повідомлення:',
   '<code>/admin add</code>',
   '',
   '<b>Додати супер-адміна:</b>',
@@ -100,7 +100,7 @@ async function addAdmin(
   const label = role === 'SUPER' ? 'супер-адмін' : 'менеджер';
 
   await ctx.reply(
-    `✅ ${name ? esc(name) : telegramId.toString()} — тепер <b>${label}</b>\n\n` +
+    `✅ ${name ? esc(name) : telegramId.toString()} - тепер <b>${label}</b>\n\n` +
       (role === 'MANAGER'
         ? 'Може: підтверджувати видачу призів, /stats, /campaigns, /export'
         : 'Повний доступ до всіх команд'),
@@ -134,7 +134,7 @@ async function removeAdmin(ctx: AppContext, telegramId: bigint): Promise<void> {
     const inEnv = env.SUPER_ADMIN_IDS.some((id) => id === telegramId);
     await ctx.reply(
       inEnv
-        ? '⚠️ Цей доступ заданий у .env (SUPER_ADMIN_IDS) — прибрати можна лише там.'
+        ? '⚠️ Цей доступ заданий у .env (SUPER_ADMIN_IDS) - прибрати можна лише там.'
         : 'Такого адміна немає.',
     );
     return;

@@ -135,7 +135,7 @@ describe('defaultConfig', () => {
 
     it(`${type}: нічого не видає й не пише в outOfStock`, () => {
       for (let count = 1; count <= 20; count++) {
-        // random = 0 — найгірший випадок для instant-win
+        // random = 0 - найгірший випадок для instant-win
         const result = evaluateAwards(ctx(count, [], () => 0), rules);
         expect(result.awards).toHaveLength(0);
         expect(result.outOfStock).toHaveLength(0);

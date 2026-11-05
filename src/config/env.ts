@@ -82,7 +82,7 @@ function loadEnv(): Env {
   if (parsed.success) return parsed.data;
 
   const issues = parsed.error.issues
-    .map((i) => `  • ${i.path.join('.') || '(root)'} — ${i.message}`)
+    .map((i) => `  • ${i.path.join('.') || '(root)'} - ${i.message}`)
     .join('\n');
 
   const hint = envFileLoaded
@@ -109,7 +109,7 @@ export const isDev = env.NODE_ENV === 'development';
 
 if (env.ADMIN_CHAT_ID === undefined) {
   console.warn(
-    '\n⚠️  ADMIN_CHAT_ID не заданий — заявки на призи нікуди не надсилатимуться.\n' +
+    '\n⚠️  ADMIN_CHAT_ID не заданий - заявки на призи нікуди не надсилатимуться.\n' +
       '   Додай бота у групу і виконай там /chatid, потім впиши значення в .env.\n',
   );
 }

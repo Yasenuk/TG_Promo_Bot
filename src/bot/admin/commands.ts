@@ -99,7 +99,7 @@ adminCommands.command('campaigns', async (ctx) => {
 
   const lines = campaigns.map(
     (c) =>
-      `${c.status === 'ACTIVE' ? '🟢' : '⚪️'} ${c.slug} — ${c.title}` +
+      `${c.status === 'ACTIVE' ? '🟢' : '⚪️'} ${c.slug} - ${c.title}` +
       `${c.adminThreadId ? '' : '  ⚠️ топік не прив’язано'}`,
   );
 
@@ -211,14 +211,14 @@ adminCommands.command('export', async (ctx) => {
       {
         caption:
           `📊 ${campaign.title}\n\n` +
-          'Лист «Активації» — для розіграшу: 1 код = 1 рядок.',
+          'Лист «Активації» - для розіграшу: 1 код = 1 рядок.',
         ...(threadId ? { message_thread_id: threadId } : {}),
       },
     );
   } catch (error) {
     ctx.log?.error({ error, slug }, 'вигрузка не вдалася');
 
-    // Це адмінська команда — показуємо причину, а не «щось пішло не так»
+    // Це адмінська команда - показуємо причину, а не «щось пішло не так»
     const info = parseTelegramError(error);
     const reason = info
       ? `Telegram ${info.code}: ${info.description}`

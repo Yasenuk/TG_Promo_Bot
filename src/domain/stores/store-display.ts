@@ -15,11 +15,11 @@ export function hasOwnName(store: StoreLike): boolean {
 }
 
 /**
- * «вул. Мазепи, буд. 28/3» — якщо назва вирізана з адреси
- * «Тіпок №5 — вул. Мазепи, 28» — якщо назва справжня
+ * «вул. Мазепи, буд. 28/3» - якщо назва вирізана з адреси
+ * «Тіпок №5 - вул. Мазепи, 28» - якщо назва справжня
  */
 export function formatStore(store: StoreLike): string {
-  return hasOwnName(store) ? `${store.name} — ${store.address}` : store.address;
+  return hasOwnName(store) ? `${store.name} - ${store.address}` : store.address;
 }
 
 /** «м. Тернопіль, вул. Мазепи, буд. 28/3» */

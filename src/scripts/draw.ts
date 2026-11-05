@@ -72,7 +72,7 @@ async function main(): Promise<void> {
   const tickets = await drawService.loadTickets(campaign.id);
 
   if (tickets.length === 0) {
-    console.error('❌ Немає жодної активації — нема серед кого розігрувати.');
+    console.error('❌ Немає жодної активації - нема серед кого розігрувати.');
     process.exit(1);
   }
 
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
   const plan = drawService.plan(tickets, prizes, seed, { uniqueWinners });
 
   console.log(`
-🎲 Розіграш — ${campaign.title}
+🎲 Розіграш - ${campaign.title}
 
    Квитків (активацій):  ${plan.totalTickets}
    Унікальних учасників: ${plan.uniqueParticipants}
@@ -95,7 +95,7 @@ async function main(): Promise<void> {
 
   if (plan.winners.length < totalPrizes) {
     console.log(
-      `⚠️  Призначено лише ${plan.winners.length} з ${totalPrizes} призів — ` +
+      `⚠️  Призначено лише ${plan.winners.length} з ${totalPrizes} призів - ` +
         `забракло придатних учасників.\n`,
     );
   }
@@ -103,13 +103,13 @@ async function main(): Promise<void> {
   console.log('🏆 Переможці:\n');
   plan.winners.forEach((w, i) => {
     console.log(
-      `   ${String(i + 1).padStart(2)}. ${w.prizeTitle}  —  ${w.fullName ?? '?'}  ` +
+      `   ${String(i + 1).padStart(2)}. ${w.prizeTitle}  -  ${w.fullName ?? '?'}  ` +
         `${w.phone ? formatPhone(w.phone) : ''}  (код ${w.codeValue})`,
     );
   });
 
   if (flag('dry-run')) {
-    console.log('\n🔍 dry-run — нічого не записано.');
+    console.log('\n🔍 dry-run - нічого не записано.');
     console.log(`   Щоб зафіксувати ЦЕЙ САМИЙ результат: --seed=${seed}\n`);
     return;
   }

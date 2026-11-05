@@ -42,7 +42,7 @@ describe('cyclic-threshold (механіка Hype)', () => {
     expect(result.awards).toHaveLength(0);
   });
 
-  it('у reason видно номер циклу — для аудиту', () => {
+  it('у reason видно номер циклу - для аудиту', () => {
     const result = evaluateAwards(ctx(8, HYPE_PRIZES), HYPE_RULES);
     expect(result.awards[0]?.reason).toContain('cycle=2');
   });

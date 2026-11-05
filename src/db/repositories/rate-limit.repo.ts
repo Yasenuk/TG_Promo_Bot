@@ -5,7 +5,7 @@ export type RateLimitVerdict =
   | { allowed: false; retryAfterSec: number };
 
 /**
- * Ліміт на ввід кодів — у БД, на відміну від загального flood-control
+ * Ліміт на ввід кодів - у БД, на відміну від загального flood-control
  */
 export const rateLimitRepo = {
   async hit(

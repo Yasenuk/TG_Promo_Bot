@@ -76,7 +76,7 @@ async function showCities(ctx: AppContext, page: number): Promise<void> {
 
   const text = await ctx.t('prize.choose_city');
 
-  // Перший показ — нове повідомлення, гортання сторінок — редагування
+  // Перший показ - нове повідомлення, гортання сторінок - редагування
   if (ctx.callbackQuery) {
     await ctx.editMessageText(text, keyboard).catch(() => ctx.reply(text, keyboard));
   } else {
@@ -209,7 +209,7 @@ async function confirmStore(ctx: AppContext, storeId: string): Promise<void> {
     await mainMenuKeyboard(),
   );
 
-  // Заявка менеджерам — після того, як усе записано
+  // Заявка менеджерам - після того, як усе записано
   await notifyAdminsAboutClaim(ctx.telegram, claim);
 
   ctx.log?.info({ claimId: claim.id, storeId }, 'магазин обрано');

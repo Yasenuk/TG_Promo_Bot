@@ -108,7 +108,7 @@ export async function launchBot(bot: Telegraf<AppContext>): Promise<void> {
     { scope: { type: 'all_private_chats' } },
   );
 
-  // Окремий набір для груп — щоб менеджери бачили саме свої команди
+  // Окремий набір для груп - щоб менеджери бачили саме свої команди
   await bot.telegram.setMyCommands(
     [
       { command: 'chatid', description: 'ID чату й топіка' },

@@ -12,7 +12,7 @@ export const errorHandlerMiddleware: MiddlewareFn<AppContext> = async (ctx, next
       return;
     }
 
-    // 403 у групі — це «бот не має прав тут», а не «людина заблокувала бота»
+    // 403 у групі - це «бот не має прав тут», а не «людина заблокувала бота»
     if (isUserUnreachable(error) && ctx.chat?.type === 'private') {
       ctx.log?.info('бот заблокований користувачем');
       if (ctx.from) await userRepo.markBlocked(BigInt(ctx.from.id));

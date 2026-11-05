@@ -28,7 +28,7 @@ const PRIZES = [
 describe('drawService.plan', () => {
   const tickets = makeTickets(50, () => 2);
 
-  it('детермінований: той самий seed — ті самі переможці', () => {
+  it('детермінований: той самий seed - ті самі переможці', () => {
     const a = drawService.plan(tickets, PRIZES, 'fixed-seed', { uniqueWinners: true });
     const b = drawService.plan(tickets, PRIZES, 'fixed-seed', { uniqueWinners: true });
 
@@ -37,7 +37,7 @@ describe('drawService.plan', () => {
     );
   });
 
-  it('інший seed — інший результат', () => {
+  it('інший seed - інший результат', () => {
     const a = drawService.plan(tickets, PRIZES, 'seed-1', { uniqueWinners: true });
     const b = drawService.plan(tickets, PRIZES, 'seed-2', { uniqueWinners: true });
 
@@ -65,7 +65,7 @@ describe('drawService.plan', () => {
     expect(plan.winners).toHaveLength(4);
   });
 
-  it('учасників менше, ніж призів — видає скільки може, без падіння', () => {
+  it('учасників менше, ніж призів - видає скільки може, без падіння', () => {
     const few = makeTickets(2, () => 1);
     const plan = drawService.plan(few, PRIZES, 's', { uniqueWinners: true });
     expect(plan.winners.length).toBeLessThanOrEqual(2);

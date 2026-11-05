@@ -9,7 +9,7 @@ import type { PrizeStrategy } from '../types.js';
  *   → 4, 10, 16 = prize 2
  *   → 6, 12, 18 = prize 3 (залишок 0)
  *
- * Ключ awards — це activationCount % cycleLength.
+ * Ключ awards - це activationCount % cycleLength.
  */
 const configSchema = z.object({
   cycleLength: z.number().int().positive(),

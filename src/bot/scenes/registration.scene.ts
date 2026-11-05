@@ -88,9 +88,9 @@ consentStep.action('consent:agree', async (ctx) => {
   const { phone, fullName } = ctx.scene.session.state;
 
   // Страховка: якщо стан загубився (наприклад, людина натиснула кнопку
-  // на старому повідомленні через тиждень) — починаємо спочатку
+  // на старому повідомленні через тиждень) - починаємо спочатку
   if (!phone || !fullName) {
-    ctx.log?.warn('порожній стан на кроці згоди — перезапуск сцени');
+    ctx.log?.warn('порожній стан на кроці згоди - перезапуск сцени');
     await ctx.scene.reenter();
     return;
   }
