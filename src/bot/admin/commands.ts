@@ -1,7 +1,8 @@
 import { Composer } from 'telegraf';
 import type { AppContext } from '../context.js';
 
-import { listStrategyTypes, resolveStrategy, validateCampaignRules } from '../../domain/rules/index.js';
+import { z } from 'zod';
+import { listStrategyTypes, validateCampaignRules, type CampaignRules } from '../../domain/rules/index.js';
 
 import { env } from '../../config/env.js';
 
@@ -237,11 +238,15 @@ adminCommands.command('export', async (ctx) => {
 adminCommands.command('create_campaign', async (ctx) => {
   if (!(await isSuperAdmin(ctx.from.id))) return;
 
-  const [, slug, strategy, ...titleParts] = ctx.message.text.trim().split(/\s+/);
+  const [firstLine = '', ...configLines] = ctx.message.text.split('\n');
+  const [, slug, strategy, ...titleParts] = firstLine.trim().split(/\s+/);
   const title = titleParts.join(' ');
+  const rawConfig = configLines.join('\n').trim();
 
-  if (!slug || !strategy || !title) {
-    await ctx.reply('Використання: /create_campaign <slug> <стратегія> <назва>');
+  if (!slug || !strategy || !title || !rawConfig) {
+    await ctx.reply(
+      'Використання:\n/create_campaign <slug> <стратегія> <назва>\n<JSON-конфіг з нового рядка>',
+    );
     return;
   }
 
@@ -258,9 +263,21 @@ adminCommands.command('create_campaign', async (ctx) => {
     await ctx.reply(`🟡 Кампанія зі slug «${slug}» вже існує.`);
   }
 
-  const rules = validateCampaignRules({
-    strategies: [{ type: strategy, config: resolveStrategy(strategy).defaultConfig }],
-  });
+  let rules: CampaignRules;
+  try {
+    rules = validateCampaignRules({
+      strategies: [{ type: strategy, config: JSON.parse(rawConfig) }],
+    });
+  } catch (error) {
+    const reason =
+      error instanceof z.ZodError
+        ? z.prettifyError(error)
+        : error instanceof Error
+          ? error.message // SyntaxError від JSON.parse
+          : String(error);
+    await ctx.reply(`❌ Кривий конфіг для «${strategy}»:\n\n${reason}`);
+    return;
+  }
 
   await campaignRepo.create({
     slug,
@@ -280,12 +297,12 @@ adminCommands.command('create_campaign', async (ctx) => {
 
   try {
     const topic = existing && existing?.adminThreadId !== null
-        ? { message_thread_id: existing.adminThreadId }
-        : await ctx.telegram.createForumTopic(
-            env.ADMIN_CHAT_ID.toString(),
-            title.slice(0, 128),
-        );
-    
+      ? { message_thread_id: existing.adminThreadId }
+      : await ctx.telegram.createForumTopic(
+        env.ADMIN_CHAT_ID.toString(),
+        title.slice(0, 128),
+      );
+
     await campaignRepo.bindAdminThread(slug, topic.message_thread_id);
     await ctx.reply(`✅ Кампанію «${title}» ${existing ? 'оновлено' : 'створено'} та топік прив'язано.`);
   } catch (error) {
@@ -297,4 +314,51 @@ adminCommands.command('create_campaign', async (ctx) => {
       `.\nСтвори топік вручну і виконай у ньому /bind_topic ${slug}`
     );
   }
+});
+
+adminCommands.command('update_campaign', async (ctx) => {
+  if (!(await isSuperAdmin(ctx.from.id))) return;
+
+  const [firstLine = '', ...configLines] = ctx.message.text.split('\n');
+  const [, slug, strategyType = ''] = firstLine.trim().split(/\s+/);
+  const rawConfig = configLines.join('\n').trim();
+
+  if (!slug || !rawConfig) {
+    await ctx.reply(
+      'Використання:\n/update_campaign <slug> [<стратегія>] \n[<JSON-конфіг з нового рядка>]',
+    );
+    return;
+  }
+  
+  const campaignRules = await campaignRepo.findBySlug(slug).catch(() => null).then(c => c?.rules);
+  if (!campaignRules) {
+    await replyCampaignNotFound(ctx, slug);
+    return;
+  }
+  
+  const campaignRulesType = strategyType ||
+    JSON.parse(JSON.stringify(campaignRules)).strategies[0].type;
+
+  let rules: CampaignRules;
+  try {
+    rules = validateCampaignRules({
+      strategies: [{ type: campaignRulesType, config: JSON.parse(rawConfig) }],
+    });
+  } catch (error) {
+    const reason =
+      error instanceof z.ZodError
+        ? z.prettifyError(error)
+        : error instanceof Error
+          ? error.message // SyntaxError від JSON.parse
+          : String(error);
+    await ctx.reply(`❌ Кривий конфіг для «${campaignRulesType}»:\n\n${reason}`);
+    return;
+  }
+
+  await prisma.campaign.update({
+    where: { slug },
+    data: { rules: rules as never },
+  });
+  
+  await ctx.reply(`✅ Конфіг кампанії «${campaignRulesType}» оновлено.`);
 });
