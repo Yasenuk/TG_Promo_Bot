@@ -28,6 +28,13 @@ export const campaignRepo = {
     });
   },
 
+  getAdminThreadId(slug: string): Promise<number | null> {
+    return prisma.campaign.findUnique({
+      where: { slug },
+      select: { adminThreadId: true },
+    }).then((c) => c?.adminThreadId ?? null);
+  },
+
   setStatus(slug: string, status: Campaign['status']): Promise<Campaign> {
     return prisma.campaign.update({ where: { slug }, data: { status } });
   },

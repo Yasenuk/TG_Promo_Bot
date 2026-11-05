@@ -255,8 +255,7 @@ adminCommands.command('create_campaign', async (ctx) => {
 
   const existing = await campaignRepo.findBySlug(slug);
   if (existing) {
-    await ctx.reply(`❌ Кампанія зі slug «${slug}» вже існує.`);
-    return;
+    await ctx.reply(`🟡 Кампанія зі slug «${slug}» вже існує.`);
   }
 
   const rules = validateCampaignRules({
@@ -280,19 +279,22 @@ adminCommands.command('create_campaign', async (ctx) => {
   }
 
   try {
-    const topic = await ctx.telegram.createForumTopic(
-      env.ADMIN_CHAT_ID.toString(),
-      title.slice(0, 128),
-    );
+    const topic = existing && existing?.adminThreadId !== null
+        ? { message_thread_id: existing.adminThreadId }
+        : await ctx.telegram.createForumTopic(
+            env.ADMIN_CHAT_ID.toString(),
+            title.slice(0, 128),
+        );
+    
     await campaignRepo.bindAdminThread(slug, topic.message_thread_id);
-    await ctx.reply(`✅ Кампанія «${title}» створена та топік прив'язано.`);
+    await ctx.reply(`✅ Кампанію «${title}» ${existing ? 'оновлено' : 'створено'} та топік прив'язано.`);
   } catch (error) {
     ctx.log?.error({ error, slug }, 'не вдалося створити топік');
     const info = parseTelegramError(error);
     await ctx.reply(
       '⚠️ Кампанію створено, а топік - ні' +
-        (info ? ` (Telegram ${info.code}: ${info.description})` : '') +
-        `.\nСтвори топік вручну і виконай у ньому /bind_topic ${slug}`
+      (info ? ` (Telegram ${info.code}: ${info.description})` : '') +
+      `.\nСтвори топік вручну і виконай у ньому /bind_topic ${slug}`
     );
   }
 });
