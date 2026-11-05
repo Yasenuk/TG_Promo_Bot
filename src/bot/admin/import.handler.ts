@@ -17,6 +17,7 @@ import {
 import { normalizeCode } from '../../domain/codes/normalize.js';
 import { codeRepo } from '../../db/repositories/code.repo.js';
 import { campaignRepo } from '../../db/repositories/campaign.repo.js';
+import { storeRepo } from '../../db/repositories/store.repo.js';
 import {
   dropPending,
   overwritePending,
@@ -29,6 +30,8 @@ import { encodeCallback, decodeCallback } from '../keyboards/callback.js';
 import { replyCampaignNotFound } from './campaign-helpers.js';
 
 export const importHandler = new Composer<AppContext>();
+
+type StoresPending = StoreImportPreview & { campaignId: string | null };
 
 type CodesPending = {
   campaignId: string;
@@ -83,7 +86,7 @@ importHandler.on(message('document'), async (ctx, next) => {
   }
 
   if (command?.startsWith('/import_stores')) {
-    await handleStores(ctx, downloaded.buffer, fileName);
+    await handleStores(ctx, downloaded.buffer, fileName, args[0]);
     return;
   }
 
@@ -277,6 +280,7 @@ importHandler.command(['import_stores', 'import_codes'], async (ctx) => {
   await ctx.reply(
     '📎 <b>Команду треба писати в підписі до файлу</b>, не окремо.\n\n' +
       '<b>Магазини:</b> колонки місто, назва, адреса\n' +
+      '<code>/import_stores slug</code> — ще й прив’яже магазини до кампанії\n' +
       '<b>Коди:</b> колонку з кодами бот знайде сам, заголовки й «№» не заважають\n\n' +
       'Формати: .csv, .xlsx (до 20 МБ)',
     { parse_mode: 'HTML' },
@@ -287,7 +291,14 @@ async function handleStores(
   ctx: AppContext,
   buffer: Buffer,
   fileName: string,
+  slug?: string,
 ): Promise<void> {
+  const campaign = slug ? await campaignRepo.findBySlug(slug) : null;
+  if (slug && !campaign) {
+    await replyCampaignNotFound(ctx, slug);
+    return;
+  }
+
   const preview = await previewStoreImport(buffer, fileName);
 
   if (!preview.ok) {
@@ -308,7 +319,10 @@ async function handleStores(
     return;
   }
 
-  const pendingId = await putPending<StoreImportPreview>('stores', ctx.from!.id, preview);
+  const pendingId = await putPending<StoresPending>('stores', ctx.from!.id, {
+    ...preview,
+    campaignId: campaign?.id ?? null,
+  });
 
   const lines = [
     '📍 <b>Імпорт магазинів</b>',
@@ -329,6 +343,13 @@ async function handleStores(
       `<b>Міст без адрес: ${preview.citiesWithoutAddress.length}</b>`,
       preview.citiesWithoutAddress.join(', '),
     );
+  }
+
+  if (campaign) {
+    lines.push('', `🔗 Прив’язати до кампанії: <b>${campaign.title}</b>`);
+    if ((await storeRepo.countLinked(campaign.id)) === 0) {
+      lines.push('⚠️ Зараз кампанії доступні ВСІ магазини. Після імпорту - лише прив’язані.');
+    }
   }
 
   await ctx.reply(lines.join('\n'), {
@@ -427,7 +448,7 @@ export async function confirmStoresImport(
   ctx: AppContext,
   pendingId: PendingId,
 ): Promise<void> {
-  const taken = await takePending<StoreImportPreview>('stores', pendingId, ctx.from!.id);
+  const taken = await takePending<StoresPending>('stores', pendingId, ctx.from!.id);
 
   if (!taken.ok) {
     await ctx.answerCbQuery(
@@ -442,12 +463,14 @@ export async function confirmStoresImport(
   await ctx.answerCbQuery('Заливаю…');
   await ctx.editMessageReplyMarkup(undefined).catch(() => undefined);
 
-  const result = await applyStoreImport(taken.payload);
+  const { campaignId } = taken.payload;
+  const result = await applyStoreImport(taken.payload, campaignId);
 
   await ctx.reply(
     `✅ Готово\n\n` +
       `Міст створено: ${result.citiesCreated}\n` +
-      `Магазинів додано: ${result.storesCreated}`,
+      `Магазинів додано: ${result.storesCreated}` +
+      (campaignId ? `\nНових прив’язок до кампанії: ${result.storesLinked}` : ''),
   );
 
   ctx.log?.info({ ...result }, 'імпорт магазинів');

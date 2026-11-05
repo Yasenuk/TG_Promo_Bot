@@ -56,4 +56,20 @@ export const storeRepo = {
   findById(id: string): Promise<(Store & { city: City }) | null> {
     return prisma.store.findUnique({ where: { id }, include: { city: true } });
   },
+
+  /** Скільки магазинів прив'язано до кампанії (0 = доступні всі) */
+  countLinked(campaignId: string): Promise<number> {
+    return prisma.campaignStore.count({ where: { campaignId } });
+  },
+
+  /** Прив'язує магазини до кампанії, дублі пропускає. Повертає к-сть нових зв'язків */
+  async linkToCampaign(campaignId: string, storeIds: string[]): Promise<number> {
+    if (storeIds.length === 0) return 0;
+
+    const { count } = await prisma.campaignStore.createMany({
+      data: storeIds.map((storeId) => ({ campaignId, storeId })),
+      skipDuplicates: true,
+    });
+    return count;
+  },
 };

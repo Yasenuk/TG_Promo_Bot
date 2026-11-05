@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client.js';
+import { storeRepo } from '../../db/repositories/store.repo.js';
 import { parseTable, toRows } from './parse-table.js';
 import { looksHierarchical, parseHierarchy } from './parse-hierarchy.js';
 import { deriveStoreName } from '../stores/store-display.js';
@@ -141,20 +142,30 @@ export type StoreImportResult = {
   storesCreated: number;
   storesUpdated: number;
   placeholdersCreated: number;
+  /** нових зв'язків магазин↔кампанія */
+  storesLinked: number;
 };
 
 /**
  * Застосування імпорту
+ *
+ * campaignId — прив'язати всі магазини з файлу до кампанії (CampaignStore).
+ * null — глобальний імпорт, без прив'язки.
  */
 export async function applyStoreImport(
   preview: StoreImportPreview,
+  campaignId: string | null,
 ): Promise<StoreImportResult> {
   const result: StoreImportResult = {
     citiesCreated: 0,
     storesCreated: 0,
     storesUpdated: 0,
     placeholdersCreated: 0,
+    storesLinked: 0,
   };
+
+  /** id усіх магазинів із файлу — і нових, і тих, що вже були */
+  const storeIds: string[] = [];
 
   const cityIds = new Map<string, string>();
 
@@ -182,6 +193,7 @@ export async function applyStoreImport(
     });
 
     if (existing) {
+      storeIds.push(existing.id);
       if (!existing.isActive) {
         await prisma.store.update({
           where: { id: existing.id },
@@ -192,9 +204,10 @@ export async function applyStoreImport(
       continue;
     }
 
-    await prisma.store.create({
+    const created = await prisma.store.create({
       data: { cityId, name: store.name, address: store.address },
     });
+    storeIds.push(created.id);
     result.storesCreated++;
   }
 
@@ -214,6 +227,11 @@ export async function applyStoreImport(
       },
     });
     result.placeholdersCreated++;
+  }
+
+  // плейсхолдери (міста без адрес) не прив'язуємо — вони неактивні
+  if (campaignId) {
+    result.storesLinked = await storeRepo.linkToCampaign(campaignId, storeIds);
   }
 
   return result;
