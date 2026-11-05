@@ -39,5 +39,7 @@ export interface PrizeStrategy<TConfig = unknown> {
   readonly configSchema: z.ZodType<TConfig>;
   /** Нейтральний конфіг-заглушка: проходить схему і нічого не видає */
   readonly defaultConfig: TConfig;
+  /** Ключі призів, які стратегія може видати - для звірки з таблицею Prize */
+  prizeKeys(config: TConfig): string[];
   evaluate(ctx: RuleContext, config: TConfig): RuleAward[];
 }

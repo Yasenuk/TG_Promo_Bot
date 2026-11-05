@@ -20,6 +20,7 @@ export const fixedThresholdStrategy: PrizeStrategy<FixedThresholdConfig> = {
   type: 'fixed-threshold',
   configSchema,
   defaultConfig: { thresholds: [] },
+  prizeKeys: (config) => config.thresholds.map((t) => t.prize),
   evaluate(ctx, config) {
     return config.thresholds
       .filter((t) => t.at === ctx.activationCount)

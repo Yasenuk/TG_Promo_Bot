@@ -18,6 +18,7 @@ export const instantWinStrategy: PrizeStrategy<InstantWinConfig> = {
   type: 'instant-win',
   configSchema,
   defaultConfig: { chance: 0, prize: '' },
+  prizeKeys: (config) => (config.prize ? [config.prize] : []),
   evaluate(ctx, config) {
     if (ctx.random() >= config.chance) return [];
     return [

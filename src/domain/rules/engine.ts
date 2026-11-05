@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { RuleAward, RuleContext, StrategyResult } from './types.js';
-import { resolveStrategy } from './registry.js';
+import { findStrategy, resolveStrategy } from './registry.js';
 
 export const campaignRulesSchema = z.object({
   strategies: z
@@ -22,6 +22,25 @@ export function validateCampaignRules(raw: unknown): CampaignRules {
     strategy.configSchema.parse(entry.config);
   }
   return rules;
+}
+
+/**
+ * Ключі призів, на які посилаються правила кампанії
+ * Сирий JSON із БД; невалідні записи просто пропускаються
+ */
+export function prizeKeysReferencedByRules(raw: unknown): string[] {
+  const parsed = campaignRulesSchema.safeParse(raw);
+  if (!parsed.success) return [];
+
+  const keys = new Set<string>();
+  for (const entry of parsed.data.strategies) {
+    const strategy = findStrategy(entry.type);
+    const config = strategy?.configSchema.safeParse(entry.config);
+    if (!strategy || !config?.success) continue;
+
+    for (const key of strategy.prizeKeys(config.data)) keys.add(key);
+  }
+  return [...keys];
 }
 
 export function evaluateAwards(

@@ -6,7 +6,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { connectWithRetry, prisma } from '../db/client.js';
-import { validateCampaignRules } from '../domain/rules/engine.js';
+import { prizeKeysReferencedByRules, validateCampaignRules } from '../domain/rules/engine.js';
 
 type PrizeInput = {
   key: string;
@@ -92,24 +92,7 @@ async function main(): Promise<void> {
     })).map((p) => p.key),
   );
 
-  const referenced = new Set<string>();
-  for (const strategy of rules.strategies) {
-    const config = strategy.config as Record<string, unknown>;
-    if (typeof config.prize === 'string') referenced.add(config.prize);
-    if (config.awards && typeof config.awards === 'object') {
-      for (const v of Object.values(config.awards)) {
-        if (typeof v === 'string') referenced.add(v);
-      }
-    }
-    if (Array.isArray(config.thresholds)) {
-      for (const t of config.thresholds) {
-        const p = (t as { prize?: unknown }).prize;
-        if (typeof p === 'string') referenced.add(p);
-      }
-    }
-  }
-
-  const missing = [...referenced].filter((key) => !prizeKeys.has(key));
+  const missing = prizeKeysReferencedByRules(rules).filter((key) => !prizeKeys.has(key));
 
   console.log(`\n🎯 Кампанія: ${campaign.title} (${campaign.slug})`);
   console.log(`📌 Статус:   ${campaign.status}`);

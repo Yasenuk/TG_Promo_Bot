@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateAwards, validateCampaignRules } from '../../../src/domain/rules/engine.js';
+import {
+  evaluateAwards,
+  prizeKeysReferencedByRules,
+  validateCampaignRules,
+} from '../../../src/domain/rules/engine.js';
 import { ctx, prize } from './helpers.js';
 import { listStrategyTypes, resolveStrategy } from '../../../src/domain/rules/registry.js';
 
@@ -141,5 +145,31 @@ describe('defaultConfig', () => {
         expect(result.outOfStock).toHaveLength(0);
       }
     });
+
+    it(`${type}: не посилається на жоден приз`, () => {
+      expect(prizeKeysReferencedByRules(rules)).toEqual([]);
+    });
   }
+});
+
+describe('prizeKeysReferencedByRules', () => {
+  it('збирає ключі з усіх стратегій без дублів', () => {
+    const rules = {
+      strategies: [
+        { type: 'cyclic-threshold', config: { cycleLength: 6, awards: { '2': 'opener', '0': 'cap' } } },
+        { type: 'fixed-threshold', config: { thresholds: [{ at: 5, prize: 'cap' }, { at: 9, prize: 'bag' }] } },
+        { type: 'every-n', config: { n: 3, prize: 'sticker' } },
+        { type: 'instant-win', config: { chance: 0.1, prize: 'bottle' } },
+      ],
+    };
+    expect(prizeKeysReferencedByRules(rules).sort()).toEqual(
+      ['bag', 'bottle', 'cap', 'opener', 'sticker'],
+    );
+  });
+
+  it('невалідні правила й невідомі стратегії не валять, а дають []', () => {
+    expect(prizeKeysReferencedByRules(null)).toEqual([]);
+    expect(prizeKeysReferencedByRules({ strategies: [{ type: 'nope', config: {} }] })).toEqual([]);
+    expect(prizeKeysReferencedByRules({ strategies: [{ type: 'every-n', config: {} }] })).toEqual([]);
+  });
 });

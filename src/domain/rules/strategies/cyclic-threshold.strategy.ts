@@ -22,6 +22,7 @@ export const cyclicThresholdStrategy: PrizeStrategy<CyclicThresholdConfig> = {
   type: 'cyclic-threshold',
   configSchema,
   defaultConfig: { cycleLength: 1, awards: {} },
+  prizeKeys: (config) => Object.values(config.awards),
   evaluate(ctx, config) {
     if (ctx.activationCount <= 0) return [];
 

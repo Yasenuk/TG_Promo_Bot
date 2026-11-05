@@ -147,44 +147,6 @@ drawHandler.command('draw', async (ctx) => {
   });
 });
 
-drawHandler.command('prizes', async (ctx) => {
-  if (!(await isSuperAdmin(ctx.from.id))) return;
-
-  const slug = ctx.message.text.split(/\s+/)[1];
-  if (!slug) {
-    await ctx.reply('Використання: /prizes <slug>');
-    return;
-  }
-
-  const campaign = await campaignRepo.findBySlug(slug);
-  if (!campaign) {
-    await replyCampaignNotFound(ctx, slug);
-    return;
-  }
-
-  const prizes = await prisma.prize.findMany({
-    where: { campaignId: campaign.id },
-    orderBy: { sortOrder: 'asc' },
-  });
-
-  if (prizes.length === 0) {
-    await ctx.reply('У кампанії немає призів.');
-    return;
-  }
-
-  const lines = prizes.map((p) => {
-    const left = p.stock === null ? '∞' : String(p.stock - p.issued - p.reserved);
-    return (
-      `<code>${p.key}</code> - ${esc(p.title)}\n` +
-      `   видано ${p.issued} · резерв ${p.reserved} · лишилось ${left}`
-    );
-  });
-
-  await ctx.reply(`🎁 <b>${esc(campaign.title)}</b>\n\n${lines.join('\n')}`, {
-    parse_mode: 'HTML',
-  });
-});
-
 /**
  * Фіксація розіграшу + одразу розсилка переможцям
  */

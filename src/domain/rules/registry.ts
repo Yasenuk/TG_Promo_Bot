@@ -10,6 +10,10 @@ export function registerStrategy<T>(strategy: PrizeStrategy<T>): void {
   strategies.set(strategy.type, strategy as unknown as PrizeStrategy<never>);
 }
 
+export function findStrategy(type: string): PrizeStrategy<never> | undefined {
+  return strategies.get(type);
+}
+
 export function resolveStrategy(type: string): PrizeStrategy<never> {
   const strategy = strategies.get(type);
   if (!strategy) {

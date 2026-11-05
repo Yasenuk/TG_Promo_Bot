@@ -16,6 +16,7 @@ export const everyNStrategy: PrizeStrategy<EveryNConfig> = {
   type: 'every-n',
   configSchema,
   defaultConfig: { n: 1, prize: '' },
+  prizeKeys: (config) => (config.prize ? [config.prize] : []),
   evaluate(ctx, config) {
     // порожній prize = стратегія вимкнена (заглушка)
     if (!config.prize) return [];
