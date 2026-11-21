@@ -27,6 +27,7 @@ import { campaignHandler } from './admin/campaign.handler.js';
 import { importHandler } from './admin/import.handler.js';
 import { adminsHandler } from './admin/admins.handler.js';
 import { startPendingCleanup } from './admin/pending.js';
+import { remindHandler } from './admin/remind.handler.js';
 
 /**
  * Клієнтська частина: реєстрація, коди, призи
@@ -70,6 +71,7 @@ export function createBot(): Telegraf<AppContext> {
   bot.use(confirmHandler);
   bot.use(adminCommands);
   bot.use(drawHandler);
+  bot.use(remindHandler);
   bot.use(prizesHandler);
   bot.use(campaignHandler);
   bot.use(importHandler);

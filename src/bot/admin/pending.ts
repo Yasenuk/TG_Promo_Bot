@@ -5,7 +5,7 @@ import { asPendingId, type PendingId } from '../../shared/pending-id.js';
 
 export { asPendingId, type PendingId };
 
-export type PendingKind = 'draw' | 'stores' | 'codes' | 'campaign' | 'file' | 'note';
+export type PendingKind = 'draw' | 'stores' | 'codes' | 'campaign' | 'file' | 'note' | 'remind';
 
 const TTL_MS = 10 * 60_000;
 

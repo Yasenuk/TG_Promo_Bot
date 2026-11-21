@@ -97,4 +97,27 @@ export const claimRepo = {
       data: { status: 'RECEIVED', receivedAt: new Date() },
     });
   },
+
+  listForStoreReminder(campaignId: string, cooldownMs: number) {
+    const cutoff = new Date(Date.now() - cooldownMs);
+    return prisma.prizeClaim.findMany({
+      where: {
+        campaignId,
+        status: 'AWAITING_STORE',
+        user: { isBlocked: false },
+        OR: [{ remindedAt: null }, { remindedAt: { lt: cutoff } }],
+        // переможців, яким ще не пішов draw.winner, не чіпаємо
+        NOT: { drawWinner: { is: { notifiedAt: null } } },
+      },
+      include: { user: true, prize: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  },
+
+  markReminded(ids: string[]) {
+    return prisma.prizeClaim.updateMany({
+      where: { id: { in: ids } },
+      data: { remindedAt: new Date() },
+    });
+  },
 };

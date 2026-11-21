@@ -5,6 +5,7 @@ import { dropPending, peekPendingKind } from './pending.js';
 import { confirmDraw } from './draw.handler.js';
 import { confirmCampaign } from './campaign.handler.js';
 import { confirmStoresImport, confirmCodesImport } from './import.handler.js';
+import { confirmRemind } from './remind.handler.js';
 
 export const confirmHandler = new Composer<AppContext>();
 
@@ -47,6 +48,9 @@ confirmHandler.on('callback_query', async (ctx, next) => {
       return;
     case 'codes':
       await confirmCodesImport(ctx, action.pendingId);
+      return;
+    case 'remind':
+      await confirmRemind(ctx, action.pendingId);
       return;
   }
 });

@@ -256,8 +256,9 @@ model PrizeClaim {
   deliveredAt           DateTime?
   receivedAt            DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  remindedAt DateTime?
 
   campaign   Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
